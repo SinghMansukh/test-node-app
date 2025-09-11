@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Tic Tac Toe - K8s Demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align:center; }
+    #board { width: 300px; margin: 20px auto; display:grid; grid-template-columns:repeat(3,1fr); gap:5px; }
+    .cell { width:100px; height:100px; border:1px solid #333; font-size:48px; display:flex; align-items:center; justify-content:center; cursor:pointer;}
+    #status { margin-top:12px; }
+    #roomInput { margin-top:12px; }
+  </style>
+</head>
+<body>
+  <h1>Tic Tac Toe (kind / k8s demo)</h1>
+  <div>
+    <input id="room" placeholder="room id (eg: r1)"/>
+    <button id="joinBtn">Join</button>
+  </div>
+  <div id="status">Not connected</div>
+  <div id="board"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const boardDiv = document.getElementById('board');
+    const status = document.getElementById('status');
+    const roomInput = document.getElementById('room');
+    const joinBtn = document.getElementById('joinBtn');
+
+    let symbol = null;
+    let board = Array(9).fill(null);
+    let myTurn = false;
+    let currentRoom = null;
+
+    function renderBoard() {
+      boardDiv.innerHTML = '';
+      board.forEach((v, idx) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = v || '';
+        cell.onclick = () => makeMove(idx);
+        boardDiv.appendChild(cell);
+      });
+    }
+
+    function makeMove(idx) {
+      if (!currentRoom) return alert('Join a room first');
+      if (!myTurn) return;
+      if (board[idx]) return;
+      socket.emit('move', { roomId: currentRoom, index: idx });
+    }
+
+    joinBtn.onclick = () => {
+      const r = roomInput.value.trim();
+      if (!r) return alert('Enter room id');
+      socket.emit('join', r, (res) => {
+        if (!res.ok) return alert(res.msg || 'cannot join');
+        symbol = res.symbol;
+        board = res.board;
+        myTurn = (res.turn === 0 && symbol === 'X') || (res.turn === 1 && symbol === 'O');
+        currentRoom = r;
+        status.textContent = Joined room ${r}. You are ${symbol}. ${myTurn ? 'Your turn' : 'Waiting...'};
+        renderBoard();
+      });
+    };
+
+    socket.on('room_update', (data) => {
+      status.textContent = Players: ${data.players}. You are ${symbol || '?'}
+    });
+
+    socket.on('move_made', (data) => {
+      board = data.board;
+      renderBoard();
+      if (data.winner) {
+        status.textContent = Winner: ${data.winner}. Resetting soon...;
+      } else if (data.draw) {
+        status.textContent = Draw. Resetting soon...;
+      } else {
+        // update turn
+        // determine if it's our turn by matching symbol with turn (server sends turn events)
+      }
+    });
+
+    socket.on('turn', (data) => {
+      // data.turn is index 0 or 1
+      // determine position of this client in the room via symbol
+      const isX = symbol === 'X';
+      myTurn = (data.turn === 0 && isX) || (data.turn === 1 && !isX);
+      status.textContent = myTurn ? 'Your turn' : "Opponent's turn";
+    });
+
+    socket.on('reset', (data) => {
+      board = data.board;
+      renderBoard();
+      status.textContent = 'Board reset. New game.';
+    });
+
+    renderBoard();
+  </script>
+</body>
