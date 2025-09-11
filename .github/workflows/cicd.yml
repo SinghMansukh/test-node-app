@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-deploy:
-    runs-on: self-hosted   # ✅ Runs on your laptop (where KIND + Docker Desktop exist)
+    runs-on: self-hosted   # ✅ Runs on your laptop (where KIND + Docker Desktop exists)
 
     steps:
       - name: Checkout Code
