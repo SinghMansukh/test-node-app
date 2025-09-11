@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-deploy:
-    runs-on: self-hosted   # since KIND is local to your machine
+    runs-on: ubuntu-latest   # since KIND is local to your machine
 
     steps:
       - name: Checkout Code
