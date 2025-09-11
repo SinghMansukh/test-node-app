@@ -23,5 +23,5 @@ jobs:
 
       - name: Deploy to KIND
         run: |
-          kubectl apply -f deployment.yaml
+          kubectl apply -f deployment.yml
           # kubectl rollout status deployment/node-demo
