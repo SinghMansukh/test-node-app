@@ -77,12 +77,12 @@ jobs:
             Write-Host " No tests found, skipping..."
           }
 
-      # 5️⃣ Docker login
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: mansukhsingh1
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - name: Docker login
+        run: docker login -u $env:DOCKER_HUB_USERNAME -p $env:DOCKER_HUB_ACCESS_TOKEN
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
 
       # 6️⃣ Build & push Docker image with Git SHA tag
       - name: Build & Push Docker Image
@@ -99,8 +99,8 @@ jobs:
           docker push $image_sha
         env:
           GITHUB_SHA: ${{ github.sha }}
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       # 7️⃣ Cleanup old Docker images on the runner
       - name: Cleanup old Docker images
@@ -114,7 +114,7 @@ jobs:
           Write-Host "Deploying node-demo to KIND..."
           # Update deployment to use latest SHA tag
           $sha = $env:GITHUB_SHA.Substring(0,7)
-          kubectl set image deployment/node-demo node-demo=${{ secrets.DOCKERHUB_USERNAME }}/node-demo:$sha
+          kubectl set image deployment/node-demo node-demo=${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:$sha
           
           # Rollout restart & status
           # kubectl rollout restart deployment/node-demo
