@@ -8,7 +8,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// serve static files from /public
+// serve static files from /public demo
 app.use(express.static(path.join(__dirname, 'public')));
 
 // In-memory rooms data (for demo only)
