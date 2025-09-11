@@ -3,7 +3,7 @@ name: Node App CI/CD (Self-Hosted)
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build-deploy:
