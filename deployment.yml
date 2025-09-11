@@ -46,7 +46,7 @@ spec:
     spec:
       containers:
         - name: node-demo
-          image: your-dockerhub-username/node-demo:latest
+          image: mansukhsingh1/node-demo:latest
           imagePullPolicy: Always   # <--- Force Kubernetes to pull latest image
           ports:
             - containerPort: 3000
