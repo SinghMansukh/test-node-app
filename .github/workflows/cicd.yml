@@ -71,9 +71,9 @@ jobs:
 
       - name: Log in to Docker Hub
         run: |
-          $username = "${{ secrets.DOCKER_HUB_USERNAME }}"
-          $password = "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}"
-          $password | docker login -u $username --password-stdin
+          $username = "${{ secrets.DOCKERHUB_USERNAME }}"
+          $password = "${{ secrets.DOCKERHUB_TOKEN }}"
+          docker login -u $username --password $password
 
       - name: Build & Push Docker Image
         run: |
