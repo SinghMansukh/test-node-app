@@ -3,7 +3,7 @@ name: CI/CD Pipeline for Node.js app with KIND
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
       - main
@@ -94,3 +94,4 @@ jobs:
     - name: Clean up KIND cluster
       run: |
         kind delete cluster
+
