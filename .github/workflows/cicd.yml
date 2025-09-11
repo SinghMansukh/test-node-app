@@ -79,17 +79,17 @@ jobs:
 
       # 5️⃣ Docker login
       - name: Log in to Docker Hub
-        run: docker login -u $env:DOCKERHUB_USERNAME -p $env:DOCKERHUB_TOKEN
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        uses: docker/login-action@v2
+        with:
+          username: mansukhsingh1
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       # 6️⃣ Build & push Docker image with Git SHA tag
       - name: Build & Push Docker Image
         run: |
           $sha = $env:GITHUB_SHA.Substring(0,7)  # short commit SHA
-          $image_latest = "${{ secrets.DOCKERHUB_USERNAME }}/node-demo:latest"
-          $image_sha = "${{ secrets.DOCKERHUB_USERNAME }}/node-demo:$sha"
+          $image_latest = "${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:latest"
+          $image_sha = "${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:$sha"
           
           # Build images
           docker build -t $image_latest -t $image_sha .
@@ -99,8 +99,8 @@ jobs:
           docker push $image_sha
         env:
           GITHUB_SHA: ${{ github.sha }}
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       # 7️⃣ Cleanup old Docker images on the runner
       - name: Cleanup old Docker images
