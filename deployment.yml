@@ -56,18 +56,32 @@ spec:
 
 ---
 
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: ttt-svc
+# spec:
+#   selector:
+#     app: ttt
+#   ports:
+#     - protocol: TCP
+#       port: 5000
+#       targetPort: 5000
+#   type: NodePort
+
 apiVersion: v1
 kind: Service
 metadata:
-  name: ttt-svc
+  name: node-demo
 spec:
-  selector:
-    app: ttt
-  ports:
-    - protocol: TCP
-      port: 5000
-      targetPort: 5000
   type: NodePort
+  selector:
+    app: node-demo
+  ports:
+    - port: 3000
+      targetPort: 3000
+      nodePort: 30001
+
 ---
 # OPTIONAL: Ingress (requires an Ingress Controller in cluster)
 apiVersion: networking.k8s.io/v1
