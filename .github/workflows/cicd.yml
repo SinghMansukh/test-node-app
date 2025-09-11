@@ -23,5 +23,12 @@ jobs:
 
       - name: Deploy to KIND
         run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
           kubectl apply -f deployment.yml
+          kubectl rollout restart deployment/node-demo
+          kubectl rollout status deployment/node-demo
+          
           # kubectl rollout status deployment/node-demo
+
+          
