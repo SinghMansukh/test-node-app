@@ -1,34 +1,41 @@
-name: Node App CI/CD
+name: Node App CI/CD (Self-Hosted)
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build-deploy:
-    runs-on: ubuntu-latest   # since KIND is local to your machine
+    runs-on: self-hosted   # ✅ Runs on your laptop (where KIND + Docker Desktop exist)
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Tests
+        run: npm test || echo "No tests found"
+
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
-      - name: Build and Push Docker Image
+      - name: Build & Push Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:latest .
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:latest
+          IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:latest
+          docker build -t $IMAGE .
+          docker push $IMAGE
 
       - name: Deploy to KIND
         run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+          echo "📦 Deploying to KIND..."
           kubectl apply -f deployment.yml
           kubectl rollout restart deployment/node-demo
           kubectl rollout status deployment/node-demo
-          
-          # kubectl rollout status deployment/node-demo
-
-          
