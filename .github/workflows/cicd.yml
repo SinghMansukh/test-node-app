@@ -84,7 +84,7 @@ jobs:
       - name: Deploy to KIND
         run: |
           Write-Host " Deploying to KIND..."
-          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f deployment.yml
           kubectl rollout restart deployment/node-demo
           kubectl rollout status deployment/node-demo
 
