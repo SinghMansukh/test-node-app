@@ -117,8 +117,8 @@ jobs:
           kubectl set image deployment/node-demo node-demo=${{ secrets.DOCKERHUB_USERNAME }}/node-demo:$sha
           
           # Rollout restart & status
-          kubectl rollout restart deployment/node-demo
-          kubectl rollout status deployment/node-demo
+          # kubectl rollout restart deployment/node-demo
+          # kubectl rollout status deployment/node-demo
         env:
           GITHUB_SHA: ${{ github.sha }}
 
