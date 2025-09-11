@@ -46,45 +46,80 @@ name: Node App CI/CD (Windows Self-Hosted)
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build-deploy:
-    runs-on: self-hosted   # ✅ runs on your Windows runner
+    runs-on: self-hosted
 
     steps:
+      # 1️⃣ Checkout code
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # 2️⃣ Setup Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
+      # 3️⃣ Install dependencies
       - name: Install Dependencies
         run: npm install
 
+      # 4️⃣ Run tests (skip if none)
       - name: Run Tests
-        # run: |
-        #   if (Test-Path package.json) { npm test } else { echo "No tests found" }
-        run: echo "No tests found, skipping..."
+        run: |
+          $pkg = Get-Content package.json | ConvertFrom-Json
+          if ($pkg.scripts.PSObject.Properties.Name -contains "test") {
+            npm test
+          } else {
+            Write-Host " No tests found, skipping..."
+          }
 
+      # 5️⃣ Docker login
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: mansukhsingh1
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+        run: docker login -u $env:DOCKERHUB_USERNAME -p $env:DOCKERHUB_TOKEN
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # 6️⃣ Build & push Docker image with Git SHA tag
       - name: Build & Push Docker Image
         run: |
-          $env:IMAGE="${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:latest"
-          docker build -t $env:IMAGE .
-          docker push $env:IMAGE
+          $sha = $env:GITHUB_SHA.Substring(0,7)  # short commit SHA
+          $image_latest = "${{ secrets.DOCKERHUB_USERNAME }}/node-demo:latest"
+          $image_sha = "${{ secrets.DOCKERHUB_USERNAME }}/node-demo:$sha"
+          
+          # Build images
+          docker build -t $image_latest -t $image_sha .
+          
+          # Push both tags
+          docker push $image_latest
+          docker push $image_sha
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # 7️⃣ Cleanup old Docker images on the runner
+      - name: Cleanup old Docker images
+        run: |
+          docker image prune -af
+          docker container prune -f
+
+      # 8️⃣ Deploy to KIND
       - name: Deploy to KIND
         run: |
-          Write-Host " Deploying to KIND..."
-          kubectl apply -f deployment.yml
-          # kubectl rollout restart deployment/node-demo
-          # kubectl rollout status deployment/node-demo
+          Write-Host "Deploying node-demo to KIND..."
+          # Update deployment to use latest SHA tag
+          $sha = $env:GITHUB_SHA.Substring(0,7)
+          kubectl set image deployment/node-demo node-demo=${{ secrets.DOCKERHUB_USERNAME }}/node-demo:$sha
+          
+          # Rollout restart & status
+          kubectl rollout restart deployment/node-demo
+          kubectl rollout status deployment/node-demo
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+
 
