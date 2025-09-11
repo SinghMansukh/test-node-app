@@ -1,36 +1,61 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: ttt-app
+# spec:
+#   replicas: 1  # For demo, keep 1 replica; scale as needed
+#   selector:
+#     matchLabels:
+#       app: ttt
+#   template:
+#     metadata:
+#       labels:
+#         app: ttt
+#     spec:
+#       containers:
+#         - name: ttt
+#           image: ttt-app:latest  # Ensure this image tag is correct
+#           imagePullPolicy: IfNotPresent
+#           ports:
+#             - containerPort: 5000
+#           env:  # Optional: Add any environment variables here
+#             - name: NODE_ENV
+#               value: "production"
+#           resources:  # Ensure resource limits and requests are set
+#             limits:
+#               memory: "256Mi"
+#               cpu: "500m"
+#             requests:
+#               memory: "128Mi"
+#               cpu: "250m"
+#           # Adding liveness and readiness probes for better health management
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ttt-app
+  name: node-demo
 spec:
-  replicas: 1  # For demo, keep 1 replica; scale as needed
+  replicas: 2
   selector:
     matchLabels:
-      app: ttt
+      app: node-demo
   template:
     metadata:
       labels:
-        app: ttt
+        app: node-demo
     spec:
       containers:
-        - name: ttt
-          image: ttt-app:latest  # Ensure this image tag is correct
-          imagePullPolicy: IfNotPresent
+        - name: node-demo
+          image: your-dockerhub-username/node-demo:latest
+          imagePullPolicy: Always   # <--- Force Kubernetes to pull latest image
           ports:
-            - containerPort: 5000
-          env:  # Optional: Add any environment variables here
-            - name: NODE_ENV
-              value: "production"
-          resources:  # Ensure resource limits and requests are set
-            limits:
-              memory: "256Mi"
-              cpu: "500m"
-            requests:
-              memory: "128Mi"
-              cpu: "250m"
-          # Adding liveness and readiness probes for better health management
+            - containerPort: 3000
+
+
+      
 
 ---
+
 apiVersion: v1
 kind: Service
 metadata:
