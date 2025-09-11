@@ -46,7 +46,7 @@ name: Node App CI/CD (Windows Self-Hosted)
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build-deploy:
