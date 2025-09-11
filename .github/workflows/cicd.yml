@@ -71,8 +71,9 @@ jobs:
 
       - name: Log in to Docker Hub
         run: |
-          echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
-        shell: bash   # ✅ force bash here since Docker login uses Linux-style pipe
+          $username = "${{ secrets.DOCKER_HUB_USERNAME }}"
+          $password = "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}"
+          $password | docker login -u $username --password-stdin
 
       - name: Build & Push Docker Image
         run: |
