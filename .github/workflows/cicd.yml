@@ -122,7 +122,10 @@ jobs:
         run: |
           Invoke-WebRequest -Uri "https://github.com/aquasecurity/trivy/releases/download/v0.66.0/trivy_0.66.0_windows-64bit.zip" -OutFile "trivy.zip"
           Expand-Archive trivy.zip -DestinationPath .
-          Move-Item trivy.exe "$env:USERPROFILE\bin\trivy.exe" -Force
+          # Move-Item trivy.exe "$env:USERPROFILE\bin\trivy.exe" -Force
+          mkdir $env:USERPROFILE\bin -Force
+          Move-Item trivy.exe $env:USERPROFILE\bin\trivy.exe -Force
+          echo "$env:USERPROFILE\bin" >> $env:GITHUB_PATH
 
 
 
