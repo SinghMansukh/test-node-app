@@ -111,13 +111,19 @@ jobs:
           DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Install Trivy on Windows
+        # run: |
+        #   Invoke-WebRequest -Uri "https://github.com/aquasecurity/trivy/releases/download/v0.66.0/trivy_0.66.0_windows-64bit.zip" -OutFile "trivy.zip"
+        #   Expand-Archive trivy.zip -DestinationPath .
+        #   # Put trivy.exe in PATH by moving it into the runner temp dir
+        #   mkdir $env:USERPROFILE\bin -Force
+        #   Move-Item trivy.exe $env:USERPROFILE\bin\trivy.exe
+        #   echo "$env:USERPROFILE\bin" >> $env:GITHUB_PATH
+
         run: |
           Invoke-WebRequest -Uri "https://github.com/aquasecurity/trivy/releases/download/v0.66.0/trivy_0.66.0_windows-64bit.zip" -OutFile "trivy.zip"
           Expand-Archive trivy.zip -DestinationPath .
-          # Put trivy.exe in PATH by moving it into the runner temp dir
-          mkdir $env:USERPROFILE\bin -Force
-          Move-Item trivy.exe $env:USERPROFILE\bin\trivy.exe
-          echo "$env:USERPROFILE\bin" >> $env:GITHUB_PATH
+          Move-Item trivy.exe "$env:USERPROFILE\bin\trivy.exe" -Force
+
 
 
       - name: Scan Docker Image with Trivy
