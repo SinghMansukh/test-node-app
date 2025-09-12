@@ -1,99 +1,66 @@
-const socket = io();
+// server.js (Node backend)
+const express = require('express');
+const http = require('http');
+const path = require('path');
+const { Server } = require('socket.io');
 
-const joinBtn = document.getElementById('joinBtn');
-const leaveBtn = document.getElementById('leaveBtn');
-const roomInput = document.getElementById('roomId');
-const statusEl = document.getElementById('status');
-const gameEl = document.querySelector('.game');
-const boardEl = document.getElementById('board');
-const symbolEl = document.getElementById('symbol');
-const turnInfo = document.getElementById('turnInfo');
-const resultEl = document.getElementById('result');
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
 
-let roomId = null;
-let mySymbol = null;
-let myTurn = false;
+// serve static files from /public
+app.use(express.static(path.join(__dirname, 'public')));
 
-joinBtn.addEventListener('click', () => {
-  const id = roomInput.value.trim();
-  if (!id) return;
-  roomId = id;
+// in-memory rooms for demo
+const rooms = {};
 
-  socket.emit('join', roomId, (res) => {
-    if (!res.ok) {
-      statusEl.innerText = res.msg;
-      return;
+io.on('connection', (socket) => {
+  console.log('⚡ New client connected');
+
+  socket.on('join', (roomId, callback) => {
+    if (!rooms[roomId]) {
+      rooms[roomId] = { board: Array(9).fill(null), turn: 0, players: [] };
     }
-    mySymbol = res.symbol;
-    statusEl.innerText = `Joined room: ${roomId}`;
-    symbolEl.innerText = mySymbol;
-    renderBoard(res.board);
-    updateTurn(res.turn);
 
-    document.querySelector('.room-container').classList.add('hidden');
-    gameEl.classList.remove('hidden');
+    if (rooms[roomId].players.length >= 2) {
+      return callback({ ok: false, msg: 'Room full' });
+    }
+
+    const symbol = rooms[roomId].players.length === 0 ? 'X' : 'O';
+    rooms[roomId].players.push(socket.id);
+
+    socket.join(roomId);
+    callback({ ok: true, symbol, board: rooms[roomId].board, turn: rooms[roomId].turn });
+    io.to(roomId).emit('room_update', { players: rooms[roomId].players.length });
+  });
+
+  socket.on('move', ({ roomId, index }) => {
+    const room = rooms[roomId];
+    if (!room) return;
+
+    const symbol = room.turn === 0 ? 'X' : 'O';
+    if (!room.board[index]) {
+      room.board[index] = symbol;
+      room.turn = 1 - room.turn;
+      io.to(roomId).emit('move_made', { board: room.board });
+      io.to(roomId).emit('turn', { turn: room.turn });
+    }
+  });
+
+  socket.on('leave', (roomId) => {
+    socket.leave(roomId);
+    if (rooms[roomId]) {
+      rooms[roomId].players = rooms[roomId].players.filter(id => id !== socket.id);
+      if (rooms[roomId].players.length === 0) delete rooms[roomId];
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('❌ Client disconnected');
   });
 });
 
-leaveBtn.addEventListener('click', () => {
-  if (roomId) {
-    socket.emit('leave', roomId);
-    resetUI();
-  }
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
-
-function renderBoard(board) {
-  boardEl.innerHTML = '';
-  board.forEach((cell, idx) => {
-    const div = document.createElement('div');
-    div.className = 'cell';
-    div.innerText = cell ? cell : '';
-    div.addEventListener('click', () => {
-      if (myTurn && !div.innerText) {
-        socket.emit('move', { roomId, index: idx });
-      }
-    });
-    boardEl.appendChild(div);
-  });
-}
-
-function updateTurn(turnIndex) {
-  const isMyTurn = (mySymbol === (turnIndex === 0 ? 'X' : 'O'));
-  myTurn = isMyTurn;
-  turnInfo.innerText = isMyTurn ? "Your turn" : "Opponent's turn";
-}
-
-// Socket listeners
-socket.on('room_update', ({ players, symbols }) => {
-  statusEl.innerText = `Room: ${roomId}, Players: ${players}`;
-});
-
-socket.on('move_made', ({ board, by, winner, draw }) => {
-  renderBoard(board);
-  if (winner) {
-    resultEl.innerText = winner === mySymbol ? "🎉 You Win!" : "😢 You Lose!";
-  } else if (draw) {
-    resultEl.innerText = "🤝 It's a Draw!";
-  }
-});
-
-socket.on('turn', ({ turn }) => {
-  updateTurn(turn);
-});
-
-socket.on('reset', ({ board }) => {
-  renderBoard(board);
-  resultEl.innerText = '';
-});
-
-function resetUI() {
-  roomId = null;
-  mySymbol = null;
-  myTurn = false;
-  roomInput.value = '';
-  statusEl.innerText = '';
-  turnInfo.innerText = '';
-  resultEl.innerText = '';
-  gameEl.classList.add('hidden');
-  document.querySelector('.room-container').classList.remove('hidden');
-}
