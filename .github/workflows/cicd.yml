@@ -102,11 +102,11 @@ jobs:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      # 7️⃣ Cleanup old Docker images on the runner
-      - name: Cleanup old Docker images
-        run: |
-          docker image prune -af
-          docker container prune -f
+      # # 7️⃣ Cleanup old Docker images on the runner
+      # - name: Cleanup old Docker images
+      #   run: |
+      #     docker image prune -af
+      #     docker container prune -f
 
       # 8️⃣ Deploy to KIND
       - name: Deploy to KIND
