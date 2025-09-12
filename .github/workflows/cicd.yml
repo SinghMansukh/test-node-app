@@ -77,6 +77,14 @@ jobs:
             Write-Host " No tests found, skipping..."
           }
 
+      - name: Run ESLint
+        run: |
+          if (Test-Path .eslintrc.json) {
+            npx eslint .
+          } else {
+            Write-Host "⚠️ No ESLint config found, skipping..."
+          }
+
       - name: Docker login
         run: docker login -u $env:DOCKER_HUB_USERNAME -p $env:DOCKER_HUB_ACCESS_TOKEN
         env:
@@ -101,6 +109,14 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Scan Docker Image with Trivy
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:latest
+          format: 'table'
+          exit-code: '0'
+          vuln-type: 'os,library'
 
       # # 7️⃣ Cleanup old Docker images on the runner
       # - name: Cleanup old Docker images
