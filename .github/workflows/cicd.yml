@@ -110,13 +110,14 @@ jobs:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
+      - name: Install Trivy on Windows
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.54.1_windows-64bit.zip" -OutFile "trivy.zip"
+          Expand-Archive trivy.zip -DestinationPath .
+          Move-Item trivy.exe C:\Windows\System32\trivy.exe
+
       - name: Scan Docker Image with Trivy
-        uses: aquasecurity/trivy-action@0.20.0
-        with:
-          image-ref: ${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:latest
-          format: 'table'
-          exit-code: '0'
-          vuln-type: 'os,library'
+        run: trivy image ${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:latest
 
       # # 7️⃣ Cleanup old Docker images on the runner
       # - name: Cleanup old Docker images
