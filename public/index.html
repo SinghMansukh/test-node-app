@@ -1,30 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Tic Tac Toe Multiplayer</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Node Demo</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>Tic Tac Toe 🎮</h1>
-
-    <div class="room-container">
-      <input id="roomId" type="text" placeholder="Enter Room ID">
-      <button id="joinBtn">Join Room</button>
-      <p id="status"></p>
-    </div>
-
-    <div class="game hidden">
-      <h2>You are: <span id="symbol">-</span></h2>
-      <div class="board" id="board"></div>
-      <p id="turnInfo"></p>
-      <p id="result"></p>
-      <button id="leaveBtn">Leave Room</button>
-    </div>
+  <!-- your UI -->
+  <div class="room-container">
+    <input id="roomId" placeholder="Room ID" />
+    <button id="joinBtn">Join</button>
+    <button id="leaveBtn">Leave</button>
+    <p id="status"></p>
   </div>
 
+  <div class="game hidden">
+    <p>You are: <span id="symbol"></span></p>
+    <p id="turnInfo"></p>
+    <div id="board" class="board"></div>
+    <p id="result"></p>
+  </div>
+
+  <!-- load socket.io client from server -->
   <script src="/socket.io/socket.io.js"></script>
-  <script src="script.js"></script>
+  <!-- your client script -->
+  <script src="client.js"></script>
 </body>
 </html>
