@@ -112,7 +112,7 @@ jobs:
 
       - name: Install Trivy on Windows
         run: |
-          Invoke-WebRequest -Uri "https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.54.1_windows-64bit.zip" -OutFile "trivy.zip"
+          Invoke-WebRequest -Uri "https://github.com/aquasecurity/trivy/releases/download/v0.66.0/trivy_0.66.0_windows-64bit.zip" -OutFile "trivy.zip"
           Expand-Archive trivy.zip -DestinationPath .
           Move-Item trivy.exe C:\Windows\System32\trivy.exe
 
