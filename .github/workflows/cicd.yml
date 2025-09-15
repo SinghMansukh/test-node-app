@@ -134,7 +134,7 @@ jobs:
       - name: Cache Trivy binary
         uses: actions/cache@v3
         with:
-          path: C:\trivy
+          path: "C:\trivy"
           key: trivy-bin-v0.66.0
 
       - name: Install Trivy (if missing)
@@ -153,6 +153,9 @@ jobs:
           key: trivy-db-${{ github.run_id }}
           restore-keys: |
             trivy-db-          
+        env:
+              ACTIONS_CACHE_USE_BACKUP_TOOL: true
+
 
 
       - name: Scan Docker Image with Trivy
