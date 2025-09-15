@@ -135,7 +135,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: C:\trivy
-          key: trivy-bin-v0.55.0
+          key: trivy-bin-v0.66.0
 
       - name: Install Trivy (if missing)
         shell: powershell
