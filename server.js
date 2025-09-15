@@ -8,6 +8,11 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+// ✅ Health check endpoint for Kubernetes probes
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // serve static files from /public
 app.use(express.static(path.join(__dirname, 'public')));
 
