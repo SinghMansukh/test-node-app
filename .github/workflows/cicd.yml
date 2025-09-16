@@ -9,9 +9,9 @@ jobs:
   build-deploy:
     runs-on: self-hosted
 
-    env: # 👈 apply globally so all cache steps use Windows zip instead of tar/gzip
-      ACTIONS_CACHE_USE_BACKUP_TOOL: true
-      ACTIONS_CACHE_COMPRESSION_DISABLED: true
+    # env: # 👈 apply globally so all cache steps use Windows zip instead of tar/gzip
+    #   ACTIONS_CACHE_USE_BACKUP_TOOL: true
+    #   ACTIONS_CACHE_COMPRESSION_DISABLED: true
 
 
     steps:
@@ -76,6 +76,9 @@ jobs:
         with:
           path: C:\trivy
           key: trivy-bin-v0.66.0
+        env:
+          ACTIONS_CACHE_USE_BACKUP_TOOL: true
+          ACTIONS_CACHE_COMPRESSION_DISABLED: true
 
       - name: Install Trivy (if missing)
         shell: powershell
@@ -94,6 +97,10 @@ jobs:
           key: trivy-db
           restore-keys: |
             trivy-db-
+
+        env:
+          ACTIONS_CACHE_USE_BACKUP_TOOL: true
+          ACTIONS_CACHE_COMPRESSION_DISABLED: true
 
       # 🔟 Scan Docker image
       - name: Scan Docker Image with Trivy
