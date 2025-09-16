@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: node-demo-config
+data:
+  Colour: "red"
+  Day: "tuesday"
