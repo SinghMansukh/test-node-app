@@ -11,6 +11,8 @@ jobs:
 
     env: # 👈 apply globally so all cache steps use Windows zip instead of tar/gzip
       ACTIONS_CACHE_USE_BACKUP_TOOL: true
+      ACTIONS_CACHE_COMPRESSION_DISABLED: true
+
 
     steps:
       # 1️⃣ Checkout code
