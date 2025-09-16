@@ -9,6 +9,9 @@ jobs:
   build-deploy:
     runs-on: self-hosted
 
+    env: # 👈 apply globally so all cache steps use Windows zip instead of tar/gzip
+      ACTIONS_CACHE_USE_BACKUP_TOOL: true
+
     steps:
       # 1️⃣ Checkout code
       - name: Checkout Code
@@ -53,14 +56,11 @@ jobs:
       # 7️⃣ Build & push Docker image
       - name: Build & Push Docker Image
         run: |
-          $sha = $env:GITHUB_SHA.Substring(0,7)  # short commit SHA
+          $sha = $env:GITHUB_SHA.Substring(0,7)
           $image_latest = "${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:latest"
           $image_sha = "${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:$sha"
           
-          # Build images
           docker build -t $image_latest -t $image_sha .
-          
-          # Push both tags
           docker push $image_latest
           docker push $image_sha
         env:
@@ -80,31 +80,4 @@ jobs:
         run: |
           if (-Not (Test-Path "C:\trivy\trivy.exe")) {
             Invoke-WebRequest -Uri https://github.com/aquasecurity/trivy/releases/download/v0.66.0/trivy_0.66.0_windows-64bit.zip -OutFile trivy.zip
-            Expand-Archive trivy.zip -DestinationPath C:\trivy
-          }
-          echo "C:\trivy" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
-      # 9️⃣ Cache Trivy DB
-      - name: Cache Trivy DB
-        uses: actions/cache@v3
-        with:
-          path: C:\Users\runneradmin\.cache\trivy
-          key: trivy-db
-          restore-keys: |
-            trivy-db-
-        env:
-          ACTIONS_CACHE_USE_BACKUP_TOOL: true
-
-      # 🔟 Scan Docker image
-      - name: Scan Docker Image with Trivy
-        run: trivy image ${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:latest
-
-      # 1️⃣1️⃣ Deploy to KIND
-      - name: Deploy to KIND
-        run: |
-          Write-Host "Deploying node-demo to KIND..."
-          $sha = $env:GITHUB_SHA.Substring(0,7)
-          kubectl set image deployment/node-demo node-demo=${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:$sha
-          kubectl rollout restart deployment node-demo
-        env:
-          GITHUB_SHA: ${{ github.sha }}
+            Expand-Archive trivy.zip -DestinationPa
