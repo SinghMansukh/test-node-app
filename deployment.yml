@@ -21,6 +21,7 @@ spec:
           envFrom:
           - configMapRef:
               name: node-demo-config
+          env:
           - name: DB_PASSWORD
             valueFrom:
               secretKeyRef:
