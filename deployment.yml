@@ -21,11 +21,11 @@ spec:
           envFrom:
           - configMapRef:
               name: node-demo-config
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: node-demo-secret
-              key: DB_PASSWORD
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: node-demo-secret
+                key: DB_PASSWORD
 ---
 
 apiVersion: v1
