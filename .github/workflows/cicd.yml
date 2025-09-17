@@ -112,7 +112,8 @@ jobs:
           Write-Host "Deploying node-demo to KIND..."
           $sha = $env:GITHUB_SHA.Substring(0,7)
           kubectl apply -f configmap.yml
-          kubectl set image deployment/node-demo node-demo=${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:$sha
+          kubectl apply -f deployment.yml
+          #kubectl set image deployment/node-demo node-demo=${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:$sha
           kubectl rollout restart deployment node-demo
         env:
           GITHUB_SHA: ${{ github.sha }}
