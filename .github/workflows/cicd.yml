@@ -53,8 +53,8 @@ jobs:
         # run: docker login -u $env:DOCKER_HUB_USERNAME -p $env:DOCKER_HUB_ACCESS_TOKEN
         uses: docker/login-action@v3
         with:
-          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-          DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       # 7️⃣ Build & push Docker image
       # - name: Build & Push Docker Image
