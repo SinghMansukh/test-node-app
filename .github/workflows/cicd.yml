@@ -80,7 +80,7 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:latest
-            # ${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:${{ github.sha }}
+  
 
 
       # 8️⃣ Cache Trivy binary
