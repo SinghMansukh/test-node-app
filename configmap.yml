@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: node-demo-config
+  namespace: dev
 data:
   Colour: "red"
   Day: "tuesday"

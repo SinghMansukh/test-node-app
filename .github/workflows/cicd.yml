@@ -50,25 +50,38 @@ jobs:
 
       # 6️⃣ Docker login
       - name: Docker login
-        run: docker login -u $env:DOCKER_HUB_USERNAME -p $env:DOCKER_HUB_ACCESS_TOKEN
-        env:
+        # run: docker login -u $env:DOCKER_HUB_USERNAME -p $env:DOCKER_HUB_ACCESS_TOKEN
+        uses: docker/login-action@v3
+        with:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       # 7️⃣ Build & push Docker image
-      - name: Build & Push Docker Image
-        run: |
-          $sha = $env:GITHUB_SHA.Substring(0,7)
-          $image_latest = "${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:latest"
-          $image_sha = "${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:$sha"
+      # - name: Build & Push Docker Image
+      #   run: |
+      #     $sha = $env:GITHUB_SHA.Substring(0,7)
+      #     $image_latest = "${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:latest"
+      #     $image_sha = "${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:$sha"
           
-          docker build -t $image_latest -t $image_sha .
-          docker push $image_latest
-          docker push $image_sha
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-          DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      #     docker build -t $image_latest -t $image_sha .
+      #     docker push $image_latest
+      #     docker push $image_sha
+      #   env:
+      #     GITHUB_SHA: ${{ github.sha }}
+      #     DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+      #     DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+
+      #    Updated 23 Sept 
+      - name: Build & Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/node-demo:${{ github.sha }}
+
 
       # 8️⃣ Cache Trivy binary
       - name: Cache Trivy binary
