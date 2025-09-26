@@ -1,5 +1,6 @@
 pipeline {
     agent any
+     tools { nodejs 'node-18' }  // name from tool configuration
     stages {
         stage('Checkout') {
             steps {
