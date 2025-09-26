@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'Jenkins', url: 'https://github.com/SinghMansukh/test-node-app.git'
+                git branch: 'master', url: 'https://github.com/SinghMansukh/test-node-app.git'
             }
         }
         stage('Install Dependencies') {
