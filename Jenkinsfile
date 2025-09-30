@@ -34,10 +34,13 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs "node-18"   // make sure you configured NodeJS in Jenkins global tools
+    }
+
     environment {
-        NODE_VERSION = "18"
-        DOCKER_HUB_USERNAME = credentials('docker-username')
-        DOCKER_HUB_PASSWORD = credentials('docker-password')
+        // DockerHub credentials stored in Jenkins
+        DOCKER_CREDS = credentials('dockerhub-creds')
     }
 
     stages {
@@ -47,30 +50,21 @@ pipeline {
             }
         }
 
-        stage('Setup Node.js') {
-            steps {
-                script {
-                    def nodeHome = tool name: "NodeJS-${NODE_VERSION}", type: 'NodeJSInstallation'
-                    env.PATH = "${nodeHome}/bin:${env.PATH}"
-                }
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                bat 'npm install'
             }
         }
 
         stage('Run Tests') {
             steps {
                 script {
-                    def hasTest = sh(
-                        script: "node -p \"require('./package.json').scripts.test || ''\"",
+                    def hasTest = bat(
+                        script: 'powershell -Command "($pkg = Get-Content package.json | ConvertFrom-Json).scripts.test"',
                         returnStdout: true
                     ).trim()
                     if (hasTest) {
-                        sh 'npm test'
+                        bat 'npm test'
                     } else {
                         echo "⚠️ No tests found, skipping..."
                     }
@@ -82,7 +76,7 @@ pipeline {
             steps {
                 script {
                     if (fileExists('.eslintrc.json')) {
-                        sh 'npx eslint .'
+                        bat 'npx eslint .'
                     } else {
                         echo "⚠️ No ESLint config found, skipping..."
                     }
@@ -92,8 +86,8 @@ pipeline {
 
         stage('Docker Login') {
             steps {
-                sh """
-                    echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin
+                bat """
+                    echo %DOCKER_CREDS_PSW% | docker login -u %DOCKER_CREDS_USR% --password-stdin
                 """
             }
         }
@@ -101,8 +95,8 @@ pipeline {
         stage('Build & Push Docker Image') {
             steps {
                 script {
-                    def image = "${DOCKER_HUB_USERNAME}/node-demo:latest"
-                    sh """
+                    def image = "${DOCKER_CREDS_USR}/node-demo:latest"
+                    bat """
                         docker build -t ${image} .
                         docker push ${image}
                     """
@@ -112,21 +106,21 @@ pipeline {
 
         stage('Trivy Scan') {
             steps {
-                sh '''
-                    if ! command -v trivy >/dev/null; then
-                        echo "Installing Trivy..."
-                        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
-                        sudo mv ./trivy /usr/local/bin/
-                    fi
-                    trivy image ${DOCKER_HUB_USERNAME}/node-demo:latest
+                bat '''
+                    if not exist C:\\trivy\\trivy.exe (
+                        echo Installing Trivy...
+                        powershell -Command "Invoke-WebRequest -Uri https://github.com/aquasecurity/trivy/releases/download/v0.66.0/trivy_0.66.0_windows-64bit.zip -OutFile trivy.zip"
+                        powershell -Command "Expand-Archive trivy.zip -DestinationPath C:\\trivy"
+                    )
+                    C:\\trivy\\trivy.exe image %DOCKER_CREDS_USR%/node-demo:latest
                 '''
             }
         }
 
         stage('Deploy to KIND') {
             steps {
-                sh '''
-                    echo "Deploying node-demo to KIND..."
+                bat '''
+                    echo Deploying node-demo to KIND...
                     kubectl apply -f configmap.yml
                     kubectl apply -f secrets.yml
                     kubectl apply -f deployment.yml
@@ -136,6 +130,7 @@ pipeline {
         }
     }
 }
+
 
 
 
