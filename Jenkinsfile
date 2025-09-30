@@ -44,11 +44,13 @@ pipeline {
     }
 
     stages {
-        stage('Checkout Code') {
-            steps {
-                checkout scm
+        checkout([$class: 'GitSCM', 
+          branches: [[name: '*/master']], 
+          userRemoteConfigs: [[url: 'https://github.com/SinghMansukh/test-node-app.git']]])
+
             }
         }
+        
 
         stage('Install Dependencies') {
             steps {
